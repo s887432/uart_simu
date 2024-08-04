@@ -52,6 +52,7 @@ void printMenu()
 	std::cout << std::endl << std::endl << "*****************************************************" << std::endl;
 	std::cout << "Select command" << std::endl;
 	std::cout << "d: disconnect" << std::endl;
+	std::cout << "c: connect" << std::endl;
 	std::cout << "1: Turn Upper Left" << std::endl;
 	std::cout << "2: Turn Upper Left" << std::endl;
 	std::cout << "3: Turn Left" << std::endl;
@@ -82,7 +83,7 @@ int main(int argc, char **argv)
 	UartProcStr uartParam;
 	pthread_t threadReceiveID;
 	
-	
+	bool bleConnected = false;
 	
 	if( argc != 2 )
 	{
@@ -117,6 +118,7 @@ int main(int argc, char **argv)
 	// ********************************************************************************
 	
 	bleConnect(fdUart);
+	bleConnected = true;
 	
 	while (KeepGoing)
 	{
@@ -127,8 +129,20 @@ int main(int argc, char **argv)
 		{
 			case 'd':
 			case 'D':
-				std::cout << "Sending disconnect command" << std::endl;
-				bleDisconnect(fdUart);
+				if( bleConnected )
+				{
+					std::cout << "Sending disconnect command" << std::endl;
+					bleDisconnect(fdUart);
+					bleConnected = false;
+				}
+				break;
+			case 'C':
+			case 'c':
+				if( !bleConnected )
+				{
+					bleConnect(fdUart);
+					bleConnected = true;
+				}
 				break;
 			case '1':
 				std::cout << "Sending Turn Upper Left command" << std::endl;
@@ -168,6 +182,7 @@ int main(int argc, char **argv)
 				break;
 			case 'x':
 			case 'X':
+				bleDisconnect(fdUart);
 				KeepGoing = false;
 				break;
 			default:
@@ -181,4 +196,3 @@ int main(int argc, char **argv)
 }
 
 // end of file
-
